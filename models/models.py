@@ -1,5 +1,9 @@
+import pandas as pd
+
+from pandas.tseries.offsets import BDay
 from scipy.stats import norm
 import numpy as np
+
 
 class Segment:
 
@@ -40,9 +44,12 @@ class Market:
         return result
 
     def simulate(self):
-        number_days = np.busday_count(self.start, self.end)
+        result = {}
+        days = pd.date_range(self.start, self.end, freq=BDay())
+        number_days = len(days)
         for stock in self.stocks():
-            stock.daily_returns = stock.distribution(scale=stock.volatility, loc=stock.mean, size=number_days)
+            result[stock.stock_id] = stock.distribution(scale=stock.volatility, loc=stock.mean, size=number_days)
+        return Report(result, days)
 
 
 class Stock:
@@ -64,3 +71,10 @@ class Stock:
         self.distribution = distribution
         self.volatility = volatility
         self.mean = mean
+
+
+class Report:
+
+    def __init__(self, data_dict, days):
+        self.data = {stock: pd.DataFrame(data=list(zip(days, data_dict[stock])), columns=['date', 'return'])
+                     for stock in data_dict}
