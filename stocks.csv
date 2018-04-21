@@ -1,4 +1,4 @@
 id,name,initial_price,initial_market_cap,distribution,volatility,mean,segment
 GOOG,Alphabet,1072.96,738.25,normal,0.1,0,internet
-FB,Facebook,166.28,478.04B,normal,0.1,0,internet
-AMAT,Applied Materials,51.09,57.39,0.1,0,semiconductor
+FB,Facebook,166.28,478.04,normal,0.1,0,internet
+AMAT,Applied Materials,51.09,57.39,normal,0.1,0,semiconductor
