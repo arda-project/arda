@@ -1,8 +1,7 @@
 import pandas as pd
 
+from functions.stats import rvs
 from pandas.tseries.offsets import BDay
-from scipy.stats import norm
-import numpy as np
 
 
 class Segment:
@@ -15,7 +14,7 @@ class Segment:
                 name=x['name'],
                 initial_price=x['initial_price'],
                 initial_market_cap=x['initial_market_cap'],
-                distribution=norm.rvs,
+                distribution=rvs,
                 volatility=x['volatility'],
                 mean=x['mean'],
             ),
@@ -43,18 +42,26 @@ class Market:
                 result.append(stock)
         return result
 
-    def simulate(self):
+    def work_days(self):
+        return pd.date_range(self.start, self.end, freq=BDay())
+
+    def simulate(self, stock_kwargs, *args, **kwargs):
         result = {}
-        days = pd.date_range(self.start, self.end, freq=BDay())
-        number_days = len(days)
+
         for stock in self.stocks():
-            result[stock.stock_id] = stock.distribution(scale=stock.volatility, loc=stock.mean, size=number_days)
-        return Report(result, days)
+            kwargs_clone = {**kwargs}
+            for key, attribute_name in stock_kwargs.items():
+                kwargs_clone[key] = getattr(stock, attribute_name)
+            result[stock.stock_id] = stock.distribution(market=self, *args, **kwargs_clone)
+
+        work_days = kwargs.get('work_days')
+
+        return Report(result, work_days)
 
 
 class Stock:
 
-    def __init__(self, stock_id, name, initial_price, initial_market_cap, volatility, mean, distribution=norm.rvs):
+    def __init__(self, stock_id, name, initial_price, initial_market_cap, volatility, mean, distribution):
         """
         :param stock_id:
         :param name:
